@@ -63,8 +63,7 @@ class WatermarkLogitsProcessor(LogitsProcessor):
 
         greenlist_size = int(max_value * self.gamma)
         vocab_permutation = torch.randperm(max_value, device=device, generator=self.rng)
-        greenlist_ids = vocab_permutation[:greenlist_size]
-        return greenlist_ids
+        return vocab_permutation[:greenlist_size]
 
     @staticmethod
     def _calc_greenlist_mask(
@@ -72,8 +71,7 @@ class WatermarkLogitsProcessor(LogitsProcessor):
     ) -> torch.BoolTensor:
         green_tokens_mask = torch.zeros_like(scores)
         green_tokens_mask[-1, greenlist_token_ids] = 1
-        final_mask = green_tokens_mask.bool()
-        return final_mask
+        return green_tokens_mask.bool()
 
     @staticmethod
     def _bias_greenlist_logits(

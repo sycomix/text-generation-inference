@@ -40,7 +40,7 @@ async def test_flash_neox_load(flash_neox, generate_load, response_snapshot):
 
     assert len(generated_texts) == 4
     assert all(
-        [text == generated_texts[0] for text in generated_texts]
+        text == generated_texts[0] for text in generated_texts
     ), generated_texts
 
     assert responses == response_snapshot

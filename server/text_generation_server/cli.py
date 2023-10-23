@@ -125,10 +125,9 @@ def download_weights(
             # Successfully downloaded weights
             return
 
-        # No weights found on the hub with this extension
         except utils.EntryNotFoundError as e:
             # Check if we want to automatically convert to safetensors or if we can use .bin weights instead
-            if not extension == ".safetensors" or not auto_convert:
+            if extension != ".safetensors" or not auto_convert:
                 raise e
 
     # Try to see if there are local pytorch weights

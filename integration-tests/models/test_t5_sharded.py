@@ -34,6 +34,6 @@ async def test_t5_sharded_load(t5_sharded, generate_load, response_snapshot):
     )
 
     assert len(responses) == 4
-    assert all([r.generated_text == responses[0].generated_text for r in responses])
+    assert all(r.generated_text == responses[0].generated_text for r in responses)
 
     assert responses == response_snapshot

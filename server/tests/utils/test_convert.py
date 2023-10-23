@@ -18,4 +18,4 @@ def test_convert_files():
 
     found_st_files = weight_files(model_id)
 
-    assert all([p in found_st_files for p in local_st_files])
+    assert all(p in found_st_files for p in local_st_files)

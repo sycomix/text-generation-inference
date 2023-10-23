@@ -59,6 +59,6 @@ async def test_mt0_base_load(mt0_base, generate_load, response_snapshot):
     )
 
     assert len(responses) == 4
-    assert all([r.generated_text == responses[0].generated_text for r in responses])
+    assert all(r.generated_text == responses[0].generated_text for r in responses)
 
     assert responses == response_snapshot

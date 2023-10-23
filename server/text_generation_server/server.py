@@ -84,7 +84,7 @@ class TextGenerationService(generate_pb2_grpc.TextGenerationServiceServicer):
                 raise ValueError(f"Batch ID {batch_pb.id} not found in cache.")
             batches.append(batch)
 
-        if len(batches) == 0:
+        if not batches:
             raise ValueError("All batches are empty")
 
         if len(batches) > 1:

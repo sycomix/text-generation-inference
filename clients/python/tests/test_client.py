@@ -47,9 +47,7 @@ def test_generate_validation_error(flan_t5_xxl_url, hf_headers):
 
 def test_generate_stream(flan_t5_xxl_url, hf_headers):
     client = Client(flan_t5_xxl_url, hf_headers)
-    responses = [
-        response for response in client.generate_stream("test", max_new_tokens=1)
-    ]
+    responses = list(client.generate_stream("test", max_new_tokens=1))
 
     assert len(responses) == 1
     response = responses[0]

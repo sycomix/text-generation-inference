@@ -39,7 +39,7 @@ async def test_mpt_load(mpt_sharded, generate_load, response_snapshot):
     )
 
     assert len(responses) == 4
-    assert all([r.generated_text == responses[0].generated_text for r in responses])
+    assert all(r.generated_text == responses[0].generated_text for r in responses)
     assert (
         responses[0].generated_text
         == " - Deep Learning\nDeep Learning is a subfield of machine learning that uses artificial neural"

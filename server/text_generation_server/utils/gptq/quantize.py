@@ -182,9 +182,7 @@ class GPTQ:
         if len(inp.shape) == 2:
             inp = inp.unsqueeze(0)
         tmp = inp.shape[0]
-        if isinstance(self.layer, nn.Linear) or isinstance(
-            self.layer, transformers.Conv1D
-        ):
+        if isinstance(self.layer, (nn.Linear, transformers.Conv1D)):
             if len(inp.shape) == 3:
                 inp = inp.reshape((-1, inp.shape[-1]))
             inp = inp.t()
@@ -346,7 +344,7 @@ class GPTQ:
             name=name, q_weight=Q, weight_error=error, timecost=(time.time() - tick)
         )
 
-        if scale == []:
+        if not scale:
             scale.append(self.quantizer.scale)
             zero.append(self.quantizer.zero)
         scale = torch.cat(scale, dim=1)
@@ -586,7 +584,9 @@ def find_layers(module, layers=(nn.Conv2d, nn.Linear), name=""):
     for name1, child in module.named_children():
         res.update(
             find_layers(
-                child, layers=layers, name=name + "." + name1 if name != "" else name1
+                child,
+                layers=layers,
+                name=f"{name}.{name1}" if name != "" else name1,
             )
         )
     return res
@@ -733,7 +733,7 @@ def make_quant_linear(module, names, bits, groupsize, name=""):
         return
     for attr in dir(module):
         tmp = getattr(module, attr)
-        name1 = name + "." + attr if name != "" else attr
+        name1 = f"{name}.{attr}" if name != "" else attr
         if name1 in names:
             delattr(module, attr)
             setattr(
@@ -749,7 +749,11 @@ def make_quant_linear(module, names, bits, groupsize, name=""):
             )
     for name1, child in module.named_children():
         make_quant_linear(
-            child, names, bits, groupsize, name + "." + name1 if name != "" else name1
+            child,
+            names,
+            bits,
+            groupsize,
+            f"{name}.{name1}" if name != "" else name1,
         )
 
 

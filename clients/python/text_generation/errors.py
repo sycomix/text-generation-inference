@@ -93,7 +93,7 @@ def parse_error(status_code: int, payload: Dict[str, str]) -> Exception:
     # Try to parse a APIInference error
     if status_code == 400:
         return BadRequestError(message)
-    if status_code == 403 or status_code == 424:
+    if status_code in {403, 424}:
         return ShardNotReadyError(message)
     if status_code == 504:
         return ShardTimeoutError(message)

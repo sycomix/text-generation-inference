@@ -409,5 +409,4 @@ class FlashGPTNeoXForCausalLM(FlashGPTNeoXPreTrainedModel):
         )
         if lm_head_indices is not None:
             hidden_states = hidden_states[lm_head_indices]
-        logits = self.embed_out(hidden_states)
-        return logits
+        return self.embed_out(hidden_states)

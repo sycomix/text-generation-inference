@@ -94,11 +94,10 @@ def scaled_multihead_dot_product_attention(
         _s_q = max(0, attn_bias.size(2) - s_q)
         _s_k = max(0, attn_bias.size(3) - s_k)
         attn_bias = attn_bias[:, :, _s_q:, _s_k:]
-        if (
-            attn_bias.size(-1) != 1
-            and attn_bias.size(-1) != s_k
-            or (attn_bias.size(-2) != 1 and attn_bias.size(-2) != s_q)
-        ):
+        if attn_bias.size(-1) not in [1, s_k] or attn_bias.size(-2) not in [
+            1,
+            s_q,
+        ]:
             raise RuntimeError(
                 f"attn_bias (shape: {attn_bias.shape}) is expected to broadcast to shape: {attn_weight.shape}."
             )
@@ -116,7 +115,7 @@ def scaled_multihead_dot_product_attention(
         attn_weight = attn_weight.masked_fill(
             ~key_padding_mask.view((b, 1, 1, s_k)), min_val
         )
-    if is_causal and (not q.size(2) == 1):
+    if is_causal and q.size(2) != 1:
         s = max(s_q, s_k)
         causal_mask = attn_weight.new_ones(s, s, dtype=torch.float16)
         causal_mask = causal_mask.tril()
@@ -178,7 +177,7 @@ def flash_attn_fn(
         _s_k = max(0, attn_bias.size(3) - key.size(1))
         attn_bias = attn_bias[:, :, _s_q:, _s_k:]
     if attn_bias is not None:
-        raise NotImplementedError(f"attn_bias not implemented for flash attn.")
+        raise NotImplementedError("attn_bias not implemented for flash attn.")
     (batch_size, seqlen) = query.shape[:2]
     if key_padding_mask is None:
         key_padding_mask = torch.ones_like(key[:, :, 0], dtype=torch.bool)
@@ -263,9 +262,9 @@ def triton_flash_attn_fn(
         _s_k = max(0, attn_bias.size(3) - key.size(1))
         attn_bias = attn_bias[:, :, _s_q:, _s_k:]
     if dropout_p:
-        raise NotImplementedError(f"Dropout not implemented for attn_impl: triton.")
+        raise NotImplementedError("Dropout not implemented for attn_impl: triton.")
     if needs_weights:
-        raise NotImplementedError(f"attn_impl: triton cannot return attn weights.")
+        raise NotImplementedError("attn_impl: triton cannot return attn weights.")
     if key_padding_mask is not None:
         warnings.warn(
             "Propagating key_padding_mask to the attention module "
@@ -667,9 +666,7 @@ class LPLayerNorm(torch.nn.LayerNorm):
 
 def rms_norm(x, weight=None, eps=1e-05):
     output = x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + eps)
-    if weight is not None:
-        return output * weight
-    return output
+    return output * weight if weight is not None else output
 
 
 class RMSNorm(torch.nn.Module):
@@ -740,10 +737,7 @@ class MPTModel(MPTPreTrainedModel):
         self.alibi = config.attn_config["alibi"]
         self.alibi_bias_max = config.attn_config["alibi_bias_max"]
         if config.init_device == "mixed":
-            if dist.get_local_rank() == 0:
-                config.init_device = "cpu"
-            else:
-                config.init_device = "meta"
+            config.init_device = "cpu" if dist.get_local_rank() == 0 else "meta"
         if config.norm_type.lower() not in NORM_CLASS_REGISTRY.keys():
             norm_options = " | ".join(NORM_CLASS_REGISTRY.keys())
             raise NotImplementedError(
@@ -957,8 +951,7 @@ class MPTModel(MPTPreTrainedModel):
             if past_key_values is not None:
                 if len(past_key_values) != self.config.n_layers:
                     raise ValueError(
-                        f"past_key_values must provide a past_key_value for each attention "
-                        + f"layer in the network (len(past_key_values)={len(past_key_values)!r}; self.config.n_layers={self.config.n_layers!r})."
+                        f"past_key_values must provide a past_key_value for each attention layer in the network (len(past_key_values)={len(past_key_values)!r}; self.config.n_layers={self.config.n_layers!r})."
                     )
                 past_position = past_key_values[0][0].size(1)
                 if self.attn_impl == "torch":
@@ -1136,11 +1129,9 @@ class MPTForCausalLM(MPTPreTrainedModel):
         See https://github.com/huggingface/transformers/blob/3ec7a47664ebe40c40f4b722f6bb1cd30c3821ec/src/transformers/models/gpt2/modeling_gpt2.py#L1122-L1133
         for an example in transformers.
         """
-        reordered_past = []
-        for layer_past in past_key_values:
-            reordered_past += [
-                tuple(
-                    (past_state.index_select(0, beam_idx) for past_state in layer_past)
-                )
-            ]
-        return reordered_past
+        return [
+            tuple(
+                (past_state.index_select(0, beam_idx) for past_state in layer_past)
+            )
+            for layer_past in past_key_values
+        ]

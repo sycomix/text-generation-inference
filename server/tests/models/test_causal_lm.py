@@ -74,10 +74,10 @@ def test_batch_from_pb(default_pb_batch, default_causal_lm_batch):
     assert batch.past_key_values is None
 
     assert all(
-        [
-            torch.equal(input_ids, all_input_ids[:, 0])
-            for input_ids, all_input_ids in zip(batch.input_ids, batch.all_input_ids)
-        ]
+        torch.equal(input_ids, all_input_ids[:, 0])
+        for input_ids, all_input_ids in zip(
+            batch.input_ids, batch.all_input_ids
+        )
     )
 
     assert batch.input_lengths == [1]
@@ -111,7 +111,7 @@ def test_causal_lm_generate_token(default_causal_lm, default_causal_lm_batch):
     assert next_batch.all_input_ids[0][-2] == 14402
     assert torch.all(next_batch.all_input_ids[0][:-2] == 50256)
 
-    assert torch.all(next_batch.attention_mask[0][0:2] == 1)
+    assert torch.all(next_batch.attention_mask[0][:2] == 1)
     assert torch.all(next_batch.attention_mask[0][2:] == 0)
 
     assert next_batch.input_ids.shape == (len(next_batch), 1)
@@ -122,15 +122,17 @@ def test_causal_lm_generate_token(default_causal_lm, default_causal_lm_batch):
 
     assert next_batch.past_key_values is not None
     assert all(
-        [p[0].shape == (1, 12, sequence_length, 64) for p in next_batch.past_key_values]
+        p[0].shape == (1, 12, sequence_length, 64)
+        for p in next_batch.past_key_values
     )
     assert all(
-        [p[1].shape == (1, 12, sequence_length, 64) for p in next_batch.past_key_values]
+        p[1].shape == (1, 12, sequence_length, 64)
+        for p in next_batch.past_key_values
     )
-    assert all([generation.generated_text is None for generation in generations])
-    assert all([len(generation.prefill_tokens) == 1 for generation in generations])
-    assert all([generation.token_id.item() == 13 for generation in generations])
-    assert all([generation.token_text == "." for generation in generations])
+    assert all(generation.generated_text is None for generation in generations)
+    assert all(len(generation.prefill_tokens) == 1 for generation in generations)
+    assert all(generation.token_id.item() == 13 for generation in generations)
+    assert all(generation.token_text == "." for generation in generations)
     assert generations[0].request_id == 0
 
 
@@ -159,7 +161,7 @@ def test_causal_lm_generate_token_completion_multi(
 ):
     next_batch = default_multi_requests_causal_lm_batch
 
-    for i in range(
+    for _ in range(
         default_multi_requests_causal_lm_batch.stopping_criterias[1].max_new_tokens - 1
     ):
         generations, next_batch = default_causal_lm.generate_token(next_batch)
@@ -256,8 +258,8 @@ def test_batch_concatenate(
     assert next_batch.stopping_criterias[1:] == next_batch_1.stopping_criterias
 
     assert next_batch.past_key_values is not None
-    assert all([p[0].shape == (3, 12, 2, 64) for p in next_batch.past_key_values])
-    assert all([p[1].shape == (3, 12, 2, 64) for p in next_batch.past_key_values])
+    assert all(p[0].shape == (3, 12, 2, 64) for p in next_batch.past_key_values)
+    assert all(p[1].shape == (3, 12, 2, 64) for p in next_batch.past_key_values)
 
     for i, past in enumerate(next_batch.past_key_values):
         assert torch.equal(next_batch_0_past_key_values[i][0][0, :, -2:], past[0][0])

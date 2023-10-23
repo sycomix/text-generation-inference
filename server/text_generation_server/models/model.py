@@ -78,22 +78,21 @@ class Model(ABC):
             all_input_ids[prefix_offset:], skip_special_tokens=False
         )
 
-        if len(new_text) > len(prefix_text) and not new_text.endswith("�"):
-            # utf-8 char at the end means it's a potential unfinished byte sequence
-            # from byte fallback tokenization.
-            # If it's in the middle, it's probably a real invalid id generated
-            # by the model
-            new_text = new_text[len(prefix_text) :]
-            return new_text, read_offset, len(all_input_ids)
-        else:
+        if len(new_text) <= len(prefix_text) or new_text.endswith("�"):
             return "", prefix_offset, read_offset
+        # utf-8 char at the end means it's a potential unfinished byte sequence
+        # from byte fallback tokenization.
+        # If it's in the middle, it's probably a real invalid id generated
+        # by the model
+        new_text = new_text[len(prefix_text) :]
+        return new_text, read_offset, len(all_input_ids)
 
     def check_initialized(self):
-        uninitialized_parameters = []
-        for n, p in self.model.named_parameters():
-            if p.data.device == torch.device("meta"):
-                uninitialized_parameters.append(n)
-        if uninitialized_parameters:
+        if uninitialized_parameters := [
+            n
+            for n, p in self.model.named_parameters()
+            if p.data.device == torch.device("meta")
+        ]:
             raise RuntimeError(
                 f"found uninitialized parameters in model {self.__class__.__name__}: {uninitialized_parameters}"
             )

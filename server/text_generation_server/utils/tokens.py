@@ -99,9 +99,7 @@ class StopSequenceCriteria:
         self.regex = re.compile(f".*{stop_sequence}$")
 
     def __call__(self, output: str) -> bool:
-        if self.regex.findall(output):
-            return True
-        return False
+        return bool(self.regex.findall(output))
 
 
 class StoppingCriteria:
@@ -128,11 +126,14 @@ class StoppingCriteria:
             return True, FinishReason.FINISH_REASON_EOS_TOKEN
 
         self.current_output += last_output
-        for stop_sequence_criteria in self.stop_sequence_criterias:
-            if stop_sequence_criteria(self.current_output):
-                return True, FinishReason.FINISH_REASON_STOP_SEQUENCE
-
-        return False, None
+        return next(
+            (
+                (True, FinishReason.FINISH_REASON_STOP_SEQUENCE)
+                for stop_sequence_criteria in self.stop_sequence_criterias
+                if stop_sequence_criteria(self.current_output)
+            ),
+            (False, None),
+        )
 
     @classmethod
     def from_pb(
@@ -183,11 +184,11 @@ class HeterogeneousNextTokenChooser:
             HeterogeneousRepetitionPenaltyLogitsProcessor(
                 repetition_penalty, dtype, device
             )
-            if any([x != 1.0 for x in repetition_penalty])
+            if any(x != 1.0 for x in repetition_penalty)
             else None
         )
 
-        if any([x != 1.0 for x in temperature]):
+        if any(x != 1.0 for x in temperature):
             do_sample = [
                 sample or x != 1.0 for x, sample in zip(temperature, do_sample)
             ]
@@ -195,15 +196,15 @@ class HeterogeneousNextTokenChooser:
                 HeterogeneousTemperatureLogitsWarper(temperature, dtype, device)
             )
 
-        if any([x != 0 for x in top_k]):
+        if any(x != 0 for x in top_k):
             do_sample = [sample or x != 0 for x, sample in zip(top_k, do_sample)]
             warpers.append(HeterogeneousTopKLogitsWarper(top_k, device))
 
-        if any([x < 1.0 for x in top_p]):
+        if any(x < 1.0 for x in top_p):
             do_sample = [sample or x < 1.0 for x, sample in zip(top_p, do_sample)]
             warpers.append(HeterogeneousTopPLogitsWarper(top_p, dtype, device))
 
-        if any([x < 1.0 for x in typical_p]):
+        if any(x < 1.0 for x in typical_p):
             do_sample = [sample or x < 1.0 for x, sample in zip(typical_p, do_sample)]
             warpers.append(HeterogeneousTypicalLogitsWarper(typical_p, dtype, device))
 

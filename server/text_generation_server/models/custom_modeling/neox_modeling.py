@@ -14,6 +14,7 @@
 # limitations under the License.
 """ PyTorch GPTNeoX model."""
 
+
 from typing import Optional, Tuple, Union
 
 import os
@@ -49,7 +50,7 @@ from text_generation_server.utils.layers import (
 
 
 CUSTOM_KERNELS_ENABLED = False
-if not os.environ.get("DISABLE_CUSTOM_KERNELS", "False") == "True":
+if os.environ.get("DISABLE_CUSTOM_KERNELS", "False") != "True":
     try:
         from custom_kernels import fused_attention_cuda
 
@@ -75,10 +76,9 @@ def make_causal_mask(
     )
     mask = mask.triu(1 + past_key_values_length)
 
-    expanded_mask = mask.unsqueeze(0).expand(
+    return mask.unsqueeze(0).expand(
         batch_size, target_length, target_length + past_key_values_length
     )
-    return expanded_mask
 
 
 def expand_mask(mask: torch.Tensor, tgt_length: int) -> torch.BoolTensor:
@@ -461,14 +461,11 @@ class GPTNeoXLayer(nn.Module):
             mlp_output = self.mlp(self.post_attention_layernorm(attn_output))
             hidden_states = mlp_output + attn_output
 
-        if use_cache:
-            outputs = (
-                hidden_states,
-            ) + outputs  # hidden_states, present, (attn_weights)
-        else:
-            outputs = (hidden_states,) + outputs[1:]  # hidden_states, (attn_weights)
-
-        return outputs
+        return (
+            (hidden_states,) + outputs
+            if use_cache
+            else (hidden_states,) + outputs[1:]
+        )
 
 
 class GPTNeoXModel(GPTNeoXPreTrainedModel):

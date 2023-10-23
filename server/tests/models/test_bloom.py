@@ -78,10 +78,10 @@ def test_batch_from_pb(default_pb_batch, default_bloom_batch):
     assert batch.past_key_values is None
 
     assert all(
-        [
-            torch.equal(input_ids, all_input_ids[:, 0])
-            for input_ids, all_input_ids in zip(batch.input_ids, batch.all_input_ids)
-        ]
+        torch.equal(input_ids, all_input_ids[:, 0])
+        for input_ids, all_input_ids in zip(
+            batch.input_ids, batch.all_input_ids
+        )
     )
 
     assert batch.input_lengths == [1]
@@ -126,15 +126,17 @@ def test_causal_lm_generate_token(default_bloom, default_bloom_batch):
 
     assert next_batch.past_key_values is not None
     assert all(
-        [p[0].shape == (16, 64, sequence_length) for p in next_batch.past_key_values]
+        p[0].shape == (16, 64, sequence_length)
+        for p in next_batch.past_key_values
     )
     assert all(
-        [p[1].shape == (16, sequence_length, 64) for p in next_batch.past_key_values]
+        p[1].shape == (16, sequence_length, 64)
+        for p in next_batch.past_key_values
     )
-    assert all([generation.generated_text is None for generation in generations])
-    assert all([len(generation.prefill_tokens) == 1 for generation in generations])
-    assert all([generation.token_id.item() == 10264 for generation in generations])
-    assert all([generation.token_text == "Test" for generation in generations])
+    assert all(generation.generated_text is None for generation in generations)
+    assert all(len(generation.prefill_tokens) == 1 for generation in generations)
+    assert all(generation.token_id.item() == 10264 for generation in generations)
+    assert all(generation.token_text == "Test" for generation in generations)
     assert generations[0].request_id == 0
 
 
@@ -163,7 +165,7 @@ def test_causal_lm_generate_token_completion_multi(
 ):
     next_batch = default_multi_requests_bloom_batch
 
-    for i in range(
+    for _ in range(
         default_multi_requests_bloom_batch.stopping_criterias[1].max_new_tokens - 1
     ):
         generations, next_batch = default_bloom.generate_token(next_batch)
@@ -257,8 +259,8 @@ def test_batch_concatenate(
     assert next_batch.stopping_criterias[1:] == next_batch_1.stopping_criterias
 
     assert next_batch.past_key_values is not None
-    assert all([p[0].shape == (3, 16, 64, 2) for p in next_batch.past_key_values])
-    assert all([p[1].shape == (3, 16, 2, 64) for p in next_batch.past_key_values])
+    assert all(p[0].shape == (3, 16, 64, 2) for p in next_batch.past_key_values)
+    assert all(p[1].shape == (3, 16, 2, 64) for p in next_batch.past_key_values)
 
     for i, past in enumerate(next_batch.past_key_values):
         assert torch.equal(next_batch_0_past_key_values[i][0][:, :, -2:], past[0][0])

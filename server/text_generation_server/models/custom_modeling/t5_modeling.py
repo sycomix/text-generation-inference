@@ -98,8 +98,6 @@ except ImportError:
     pass
 except Exception:
     logger.warning("discovered apex but it failed to load, falling back to T5LayerNorm")
-    pass
-
 ALL_LAYERNORM_LAYERS.append(T5LayerNorm)
 
 
@@ -527,10 +525,7 @@ class T5LayerSelfAttention(nn.Module):
             output_attentions=output_attentions,
         )
         hidden_states = hidden_states + self.dropout(attention_output[0])
-        outputs = (hidden_states,) + attention_output[
-            1:
-        ]  # add attentions if we output them
-        return outputs
+        return (hidden_states,) + attention_output[1:]
 
 
 class T5LayerCrossAttention(nn.Module):
@@ -574,10 +569,7 @@ class T5LayerCrossAttention(nn.Module):
             output_attentions=output_attentions,
         )
         layer_output = hidden_states + self.dropout(attention_output[0])
-        outputs = (layer_output,) + attention_output[
-            1:
-        ]  # add attentions if we output them
-        return outputs
+        return (layer_output,) + attention_output[1:]
 
 
 class T5Block(nn.Module):
@@ -666,8 +658,10 @@ class T5Block(nn.Module):
                 hidden_states, min=-clamp_value, max=clamp_value
             )
 
-        do_cross_attention = self.is_decoder and encoder_hidden_states is not None
-        if do_cross_attention:
+        if (
+            do_cross_attention := self.is_decoder
+            and encoder_hidden_states is not None
+        ):
             # the actual query length is unknown for cross attention
             # if using past key value states. Need to inject it here
             if present_key_value_state is not None:

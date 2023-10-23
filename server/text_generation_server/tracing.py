@@ -44,7 +44,7 @@ class UDSOpenTelemetryAioServerInterceptor(OpenTelemetryAioServerInterceptor):
             attributes["rpc.user_agent"] = metadata["user-agent"]
 
         # We use gRPC over a UNIX socket
-        attributes.update({SpanAttributes.NET_TRANSPORT: "unix"})
+        attributes[SpanAttributes.NET_TRANSPORT] = "unix"
 
         return self._tracer.start_as_current_span(
             name=handler_call_details.method,

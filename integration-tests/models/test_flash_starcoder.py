@@ -48,6 +48,6 @@ async def test_flash_starcoder_load(flash_starcoder, generate_load, response_sna
     )
 
     assert len(responses) == 4
-    assert all([r.generated_text == responses[0].generated_text for r in responses])
+    assert all(r.generated_text == responses[0].generated_text for r in responses)
 
     assert responses == response_snapshot

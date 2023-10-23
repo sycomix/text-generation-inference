@@ -145,7 +145,7 @@ class CausalLMBatch(Batch):
 
     @tracer.start_as_current_span("filter")
     def filter(self, request_ids: List[int]) -> Optional["CausalLMBatch"]:
-        if len(request_ids) == 0:
+        if not request_ids:
             raise ValueError("Batch must have at least one request")
         if len(request_ids) == len(self):
             return self

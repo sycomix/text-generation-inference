@@ -170,7 +170,7 @@ try:
         zeros_shifter = (offs_bn % infearure_per_bits) * bits
         accumulator = tl.zeros((BLOCK_SIZE_M, BLOCK_SIZE_N), dtype=tl.float32)
 
-        for k in range(0, num_pid_k):
+        for _ in range(0, num_pid_k):
             g_idx = tl.load(g_ptrs)
 
             # Fetch scales and zeros; these are per-outfeature and thus reused in the inner loop
@@ -241,8 +241,7 @@ class QuantLinearFunction(torch.autograd.Function):
     @staticmethod
     @custom_fwd(cast_inputs=torch.float16)
     def forward(ctx, input, qweight, scales, qzeros, g_idx, bits, maxq):
-        output = matmul248(input, qweight, scales, qzeros, g_idx, bits, maxq)
-        return output
+        return matmul248(input, qweight, scales, qzeros, g_idx, bits, maxq)
 
 
 class QuantLinear(nn.Module):
@@ -281,10 +280,7 @@ class QuantLinear(nn.Module):
         g_idx = torch.tensor(
             [i // groupsize for i in range(infeatures)], dtype=torch.int32
         )
-        if bias:
-            bias = torch.zeros((outfeatures), dtype=torch.float16)
-        else:
-            bias = None
+        bias = torch.zeros((outfeatures), dtype=torch.float16) if bias else None
         return cls(qweight, qzeros, scales, g_idx, bias, bits, groupsize)
 
     def pack(self, linear, scales, zeros, g_idx=None):
@@ -297,14 +293,13 @@ class QuantLinear(nn.Module):
         if linear.bias is not None:
             self.bias = linear.bias.clone().half()
 
-        intweight = []
-        for idx in range(self.infeatures):
-            intweight.append(
-                torch.round(
-                    (linear.weight.data[:, idx] + scale_zeros[self.g_idx[idx]])
-                    / self.scales[self.g_idx[idx]]
-                ).to(torch.int)[:, None]
-            )
+        intweight = [
+            torch.round(
+                (linear.weight.data[:, idx] + scale_zeros[self.g_idx[idx]])
+                / self.scales[self.g_idx[idx]]
+            ).to(torch.int)[:, None]
+            for idx in range(self.infeatures)
+        ]
         intweight = torch.cat(intweight, dim=1)
         intweight = intweight.t().contiguous()
         intweight = intweight.numpy().astype(np.uint32)
@@ -314,14 +309,13 @@ class QuantLinear(nn.Module):
         i = 0
         row = 0
         while row < qweight.shape[0]:
-            if self.bits in [2, 4, 8]:
-                for j in range(i, i + (32 // self.bits)):
-                    qweight[row] |= intweight[j] << (self.bits * (j - i))
-                i += 32 // self.bits
-                row += 1
-            else:
+            if self.bits not in [2, 4, 8]:
                 raise NotImplementedError("Only 2,4,8 bits are supported.")
 
+            for j in range(i, i + (32 // self.bits)):
+                qweight[row] |= intweight[j] << (self.bits * (j - i))
+            i += 32 // self.bits
+            row += 1
         qweight = qweight.astype(np.int32)
         self.qweight = torch.from_numpy(qweight)
 
@@ -333,14 +327,13 @@ class QuantLinear(nn.Module):
         i = 0
         col = 0
         while col < qzeros.shape[1]:
-            if self.bits in [2, 4, 8]:
-                for j in range(i, i + (32 // self.bits)):
-                    qzeros[:, col] |= zeros[:, j] << (self.bits * (j - i))
-                i += 32 // self.bits
-                col += 1
-            else:
+            if self.bits not in [2, 4, 8]:
                 raise NotImplementedError("Only 2,4,8 bits are supported.")
 
+            for j in range(i, i + (32 // self.bits)):
+                qzeros[:, col] |= zeros[:, j] << (self.bits * (j - i))
+            i += 32 // self.bits
+            col += 1
         qzeros = qzeros.astype(np.int32)
         self.qzeros = torch.from_numpy(qzeros)
 

@@ -30,7 +30,7 @@ CUSTOM_SEQ_RE = re.compile(r"(\[START_(DNA|SMILES|I_SMILES|AMINO)])(.*?)(\[END_\
 # corpus cleaning step and removed in pretokenization. The digits are added to increase the chance
 # that they do not occur in the corpus. The digits are escaped so that the token does not appear
 # literally in the source code in case we ever include it in the training data.
-SPLIT_MARKER = f"SPL{1}T-TH{1}S-Pl3A5E"
+SPLIT_MARKER = 'SPL1T-TH1S-Pl3A5E'
 
 
 def _insert_split_marker(m: re.Match):

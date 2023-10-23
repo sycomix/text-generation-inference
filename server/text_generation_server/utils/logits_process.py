@@ -112,7 +112,7 @@ class HeterogeneousRepetitionPenaltyLogitsProcessor(LogitsProcessor):
 
     def filter(self, indices):
         self.penalty = [self.penalty[i] for i in indices]
-        if any([x != 1.0 for x in self.penalty]):
+        if any(x != 1.0 for x in self.penalty):
             self.penalty_tensor = self.penalty_tensor[indices]
             return self
         return None
@@ -143,7 +143,7 @@ class HeterogeneousTemperatureLogitsWarper:
 
     def filter(self, indices):
         self.temperature = [self.temperature[i] for i in indices]
-        if any([x != 1.0 for x in self.temperature]):
+        if any(x != 1.0 for x in self.temperature):
             self.temperature_tensor = self.temperature_tensor[indices]
             return self
         return None
@@ -196,13 +196,11 @@ class HeterogeneousTopPLogitsWarper(LogitsWarper):
         indices_to_remove = sorted_indices_to_remove.scatter(
             1, sorted_indices, sorted_indices_to_remove
         )
-        warped_scores = scores.masked_fill_(indices_to_remove, self.filter_value)
-
-        return warped_scores
+        return scores.masked_fill_(indices_to_remove, self.filter_value)
 
     def filter(self, indices):
         self.top_p = [self.top_p[i] for i in indices]
-        if any([x < 1.0 for x in self.top_p]):
+        if any(x < 1.0 for x in self.top_p):
             self.top_p_opposite = self.top_p_opposite[indices]
             return self
         return None
@@ -359,9 +357,7 @@ class HeterogeneousTypicalLogitsWarper(LogitsWarper):
             1, sorted_indices, sorted_indices_to_remove
         )
 
-        warped_scores = scores.masked_fill_(indices_to_remove, self.filter_value)
-
-        return warped_scores
+        return scores.masked_fill_(indices_to_remove, self.filter_value)
 
     def filter(self, indices):
         self.mass = [self.mass[i] for i in indices]
@@ -399,12 +395,11 @@ class HeterogeneousProcessorWrapper(LogitsProcessor):
         return scores
 
     def filter(self, indices):
-        new_processors = {}
-        for i, idx in enumerate(indices):
-            if idx in self.processors:
-                new_processors[i] = self.processors[idx]
-
-        if new_processors:
+        if new_processors := {
+            i: self.processors[idx]
+            for i, idx in enumerate(indices)
+            if idx in self.processors
+        }:
             self.processors = new_processors
             return self
         return None

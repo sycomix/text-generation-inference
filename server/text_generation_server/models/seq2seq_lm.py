@@ -154,7 +154,7 @@ class Seq2SeqLMBatch(Batch):
 
     @tracer.start_as_current_span("filter")
     def filter(self, request_ids: List[int]) -> Optional["Seq2SeqLMBatch"]:
-        if len(request_ids) == 0:
+        if not request_ids:
             raise ValueError("Batch must have at least one request")
         if len(request_ids) == len(self):
             return self
@@ -228,9 +228,7 @@ class Seq2SeqLMBatch(Batch):
 
         # Ensure that past_key_values tensors can be updated in-place
         if type(self.past_key_values[0]) == tuple:
-            self.past_key_values = [
-                [t for t in layer] for layer in self.past_key_values
-            ]
+            self.past_key_values = [list(layer) for layer in self.past_key_values]
 
         decoder_past_seq_len = max_decoder_input_length - 1
         for layer in self.past_key_values:

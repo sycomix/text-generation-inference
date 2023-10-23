@@ -132,27 +132,25 @@ def test_seq2seq_lm_generate_token(default_seq2seq_lm, default_seq2seq_lm_batch)
 
     assert next_batch.past_key_values is not None
     assert all(
-        [p[0].shape == (len(next_batch), 6, 1, 64) for p in next_batch.past_key_values]
+        p[0].shape == (len(next_batch), 6, 1, 64)
+        for p in next_batch.past_key_values
     )
     assert all(
-        [p[1].shape == (len(next_batch), 6, 1, 64) for p in next_batch.past_key_values]
+        p[1].shape == (len(next_batch), 6, 1, 64)
+        for p in next_batch.past_key_values
     )
     assert all(
-        [
-            p[2].shape == (len(next_batch), 6, sequence_length, 64)
-            for p in next_batch.past_key_values
-        ]
+        p[2].shape == (len(next_batch), 6, sequence_length, 64)
+        for p in next_batch.past_key_values
     )
     assert all(
-        [
-            p[3].shape == (len(next_batch), 6, sequence_length, 64)
-            for p in next_batch.past_key_values
-        ]
+        p[3].shape == (len(next_batch), 6, sequence_length, 64)
+        for p in next_batch.past_key_values
     )
-    assert all([generation.generated_text is None for generation in generations])
-    assert all([len(generation.prefill_tokens) == 1 for generation in generations])
-    assert all([generation.token_id.item() == 259 for generation in generations])
-    assert all([generation.token_text == " " for generation in generations])
+    assert all(generation.generated_text is None for generation in generations)
+    assert all(len(generation.prefill_tokens) == 1 for generation in generations)
+    assert all(generation.token_id.item() == 259 for generation in generations)
+    assert all(generation.token_text == " " for generation in generations)
     assert generations[0].request_id == 0
 
 
@@ -178,7 +176,7 @@ def test_seq2seq_lm_generate_token_completion_multi(
 ):
     next_batch = default_multi_requests_seq2seq_lm_batch
 
-    for i in range(4):
+    for _ in range(4):
         generations, next_batch = default_seq2seq_lm.generate_token(next_batch)
         assert len(generations) == len(next_batch)
 
@@ -278,16 +276,20 @@ def test_batch_concatenate(
 
     assert next_batch.past_key_values is not None
     assert all(
-        [p[0].shape == (len(next_batch), 6, 2, 64) for p in next_batch.past_key_values]
+        p[0].shape == (len(next_batch), 6, 2, 64)
+        for p in next_batch.past_key_values
     )
     assert all(
-        [p[1].shape == (len(next_batch), 6, 2, 64) for p in next_batch.past_key_values]
+        p[1].shape == (len(next_batch), 6, 2, 64)
+        for p in next_batch.past_key_values
     )
     assert all(
-        [p[2].shape == (len(next_batch), 6, 2, 64) for p in next_batch.past_key_values]
+        p[2].shape == (len(next_batch), 6, 2, 64)
+        for p in next_batch.past_key_values
     )
     assert all(
-        [p[3].shape == (len(next_batch), 6, 2, 64) for p in next_batch.past_key_values]
+        p[3].shape == (len(next_batch), 6, 2, 64)
+        for p in next_batch.past_key_values
     )
 
     for i, past in enumerate(next_batch.past_key_values):

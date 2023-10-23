@@ -25,9 +25,7 @@ def _remove_duplicate_names(
     shareds = _find_shared_tensors(state_dict)
     to_remove = defaultdict(list)
     for shared in shareds:
-        complete_names = set(
-            [name for name in shared if _is_complete(state_dict[name])]
-        )
+        complete_names = {name for name in shared if _is_complete(state_dict[name])}
         if not complete_names:
             raise RuntimeError(
                 f"Error while trying to find names to remove to save state dict, but found no suitable name to keep for saving amongst: {shared}. None is covering the entire storage.Refusing to save/load the model since you could be storing much more memory than needed. Please refer to https://huggingface.co/docs/safetensors/torch_shared_tensors for more information. Or open an issue."
@@ -35,17 +33,11 @@ def _remove_duplicate_names(
 
         keep_name = sorted(list(complete_names))[0]
 
-        # Mecanism to preferentially select keys to keep
-        # coming from the on-disk file to allow
-        # loading models saved with a different choice
-        # of keep_name
-        preferred = complete_names.difference(discard_names)
-        if preferred:
+        if preferred := complete_names.difference(discard_names):
             keep_name = sorted(list(preferred))[0]
 
         if preferred_names:
-            preferred = preferred_names.intersection(complete_names)
-            if preferred:
+            if preferred := preferred_names.intersection(complete_names):
                 keep_name = sorted(list(preferred))[0]
         for name in sorted(shared):
             if name != keep_name:
@@ -80,8 +72,7 @@ def convert_file(pt_file: Path, sf_file: Path, discard_names: List[str]):
     os.makedirs(dirname, exist_ok=True)
     save_file(loaded, sf_file, metadata=metadata)
     reloaded = load_file(sf_file)
-    for k in loaded:
-        pt_tensor = loaded[k]
+    for k, pt_tensor in loaded.items():
         sf_tensor = reloaded[k]
         if not torch.equal(pt_tensor, sf_tensor):
             raise RuntimeError(f"The output tensors do not match for key {k}")
