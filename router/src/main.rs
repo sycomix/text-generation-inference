@@ -372,12 +372,12 @@ pub async fn get_model_info(api: &ApiRepo) -> Option<HubModelInfo> {
         }
         Some(hub_model_info)
     } else {
-        None
+        None } else { None
     }
 }
 
 /// get base tokenizer
-pub async fn get_base_tokenizer(api: &Api, api_repo: &ApiRepo) -> Option<Tokenizer> {
+pub async fn get_base_tokenizer(api: &Api, api_repo: &ApiRepo) -> Result<Option<Tokenizer>, RouterError> {
     let config_filename = api_repo.get("config.json").await.ok()?;
 
     // Open the file in read-only mode with buffer.
@@ -394,7 +394,7 @@ pub async fn get_base_tokenizer(api: &Api, api_repo: &ApiRepo) -> Option<Tokeniz
             "main".to_string(),
         ));
 
-        let tokenizer_filename = api_base_repo.get("tokenizer.json").await.ok()?;
+        let tokenizer_filename = api_base_repo.get("tokenizer.json").await.map_err(|_| RouterError::Cache)?;
         Tokenizer::from_file(tokenizer_filename).ok()
     } else {
         None
@@ -403,6 +403,8 @@ pub async fn get_base_tokenizer(api: &Api, api_repo: &ApiRepo) -> Option<Tokeniz
 
 #[derive(Debug, Error)]
 enum RouterError {
+    #[error("GitHub Actions failed: {0}")]
+    ActionsFailure(String),
     #[error("Argument validation error: {0}")]
     ArgumentValidation(String),
     #[error("Unable to connect to the Python model shards: {0}")]
@@ -416,5 +418,5 @@ enum RouterError {
     #[error("Tokio runtime failed to start: {0}")]
     Tokio(#[from] std::io::Error),
     #[error("Axum webserver failed: {0}")]
-    Axum(#[from] axum::BoxError),
+    Axum(#[from] BoxError),
 }
