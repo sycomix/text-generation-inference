@@ -377,7 +377,7 @@ pub async fn get_model_info(api: &ApiRepo) -> Option<HubModelInfo> {
 }
 
 /// get base tokenizer
-pub async fn get_base_tokenizer(api: &Api, api_repo: &ApiRepo) -> Option<Tokenizer> {
+pub async fn get_base_tokenizer(api: &Api, api_repo: &ApiRepo) -> Result<Option<Tokenizer>, RouterError> {
     let config_filename = api_repo.get("config.json").await.ok()?;
 
     // Open the file in read-only mode with buffer.
@@ -394,7 +394,7 @@ pub async fn get_base_tokenizer(api: &Api, api_repo: &ApiRepo) -> Option<Tokeniz
             "main".to_string(),
         ));
 
-        let tokenizer_filename = api_base_repo.get("tokenizer.json").await.ok()?;
+        let tokenizer_filename = api_base_repo.get("tokenizer.json").await.map_err(|_| RouterError::Cache)?;
         Tokenizer::from_file(tokenizer_filename).ok()
     } else {
         None
