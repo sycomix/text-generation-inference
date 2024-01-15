@@ -372,7 +372,7 @@ pub async fn get_model_info(api: &ApiRepo) -> Option<HubModelInfo> {
         }
         Some(hub_model_info)
     } else {
-        None
+        None } else { None
     }
 }
 
