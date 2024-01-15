@@ -403,6 +403,8 @@ pub async fn get_base_tokenizer(api: &Api, api_repo: &ApiRepo) -> Result<Option<
 
 #[derive(Debug, Error)]
 enum RouterError {
+    #[error("GitHub Actions failed: {0}")]
+    ActionsFailure(String),
     #[error("Argument validation error: {0}")]
     ArgumentValidation(String),
     #[error("Unable to connect to the Python model shards: {0}")]
@@ -416,5 +418,5 @@ enum RouterError {
     #[error("Tokio runtime failed to start: {0}")]
     Tokio(#[from] std::io::Error),
     #[error("Axum webserver failed: {0}")]
-    Axum(#[from] axum::BoxError),
+    Axum(#[from] BoxError),
 }
