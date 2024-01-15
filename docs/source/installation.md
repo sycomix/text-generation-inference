@@ -1,5 +1,13 @@
 # Installation
 
+## Build Extensions
+
+To build extensions for serving models with custom kernels, run
+
+```bash
+BUILD_EXTENSIONS=True make install
+```
+
 This section explains how to install the CLI tool as well as installing TGI from source. **The strongly recommended approach is to use Docker, as it does not require much setup. Check [the Quick Tour](./quicktour) to learn how to run TGI with Docker.**
 
 ## Install CLI
@@ -28,7 +36,7 @@ BUILD_EXTENSIONS=True make install
 
 ## Local Installation from Source
 
-Before you start, you will need to setup your environment, and install Text Generation Inference. Text Generation Inference is tested on **Python 3.9+**.
+Before you start, you will need to setup your environment, and install Text Generation Inference and its dependencies. Text Generation Inference is tested on **Python 3.9+** and requires the installation of Rust, Protoc, and other system dependencies in order to build extensions and serve models with custom kernels.
 
 Text Generation Inference is available on pypi, conda and GitHub. 
 
@@ -58,6 +66,12 @@ On MacOS, using Homebrew:
 
 ```bash
 brew install protobuf
+```
+
+To build extensions for serving models with custom kernels, run
+
+```bash
+BUILD_EXTENSIONS=True make install
 ```
 
 Then run to install Text Generation Inference:
