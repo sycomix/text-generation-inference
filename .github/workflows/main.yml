@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: eu-central-1
+          audience: sts.amazonaws.com
+
+        env:
+          AWS_REGION: eu-central-1
+          EC2_AMI_ID: ami-0ab09c07cfd194259
+          EC2_INSTANCE_TYPE: g5.12xlarge
+          EC2_SUBNET_ID: subnet-988fd9f2,subnet-6f56db13,subnet-6a039326
+          EC2_SECURITY_GROUP: sg-072f92ae3082936c6
