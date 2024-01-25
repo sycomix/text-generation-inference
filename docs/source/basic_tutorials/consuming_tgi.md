@@ -7,13 +7,16 @@ There are many ways you can consume Text Generation Inference server in your app
 After the launch, you can query the model using either the `/generate` or `/generate_stream` routes:
 
 ```bash
-curl 127.0.0.1:8080/generate \
+curl http://localhost:8080/generate \
     -X POST \
-    -d '{"inputs":"What is Deep Learning?","parameters":{"max_new_tokens":20}}' \
-    -H 'Content-Type: application/json'
+    -H "Content-Type: application/json" \
+    -d '{
+        "inputs": "What is Deep Learning?",
+        "parameters": {
+            "max_new_tokens": 20
+        }
+    }'
 ```
-
-
 ## Inference Client
 
 [`huggingface-hub`](https://huggingface.co/docs/huggingface_hub/main/en/index) is a Python library to interact with the Hugging Face Hub, including its endpoints. It provides a nice high-level class, [`~huggingface_hub.InferenceClient`], which makes it easy to make calls to a TGI endpoint. `InferenceClient` also takes care of parameter validation and provides a simple to-use interface.
@@ -29,7 +32,8 @@ Once you start the TGI server, instantiate `InferenceClient()` with the URL to t
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(model="http://127.0.0.1:8080")
-client.text_generation(prompt="Write a code for snake game")
+for token in client.text_generation("Write a code for snake game", max_new_tokens=20, stream=True):
+    print(token)
 ```
 
 You can do streaming with `InferenceClient` by passing `stream=True`. Streaming will return tokens as they are being generated in the server. To use streaming, you can do as follows:
@@ -63,13 +67,12 @@ You can check out the details of the function [here](https://huggingface.co/docs
 ## ChatUI
 
 ChatUI is an open-source interface built for LLM serving. It offers many customization options, such as web search with SERP API and more. ChatUI can automatically consume the TGI server and even provides an option to switch between different TGI endpoints. You can try it out at [Hugging Chat](https://huggingface.co/chat/), or use the [ChatUI Docker Space](https://huggingface.co/new-space?template=huggingchat/chat-ui-template) to deploy your own Hugging Chat to Spaces.
-
 To serve both ChatUI and TGI in same environment, simply add your own endpoints to the `MODELS` variable in `.env.local` file inside the `chat-ui` repository. Provide the endpoints pointing to where TGI is served.
 
 ```
 {
 // rest of the model config here
-"endpoints": [{"url": "https://HOST:PORT/generate_stream"}]
+"endpoints": [{"url": "http://localhost:8080/generate_stream"}]
 }
 ```
 
