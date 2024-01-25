@@ -9,8 +9,7 @@ You can use TGI command-line interface (CLI) to download weights, serve and quan
 To install the CLI, you need to first clone the TGI repository and then run `make`.
 
 ```bash
-git clone https://github.com/huggingface/text-generation-inference.git && cd text-generation-inference
-make install
+pip install text-generation-inference
 ```
 
 If you would like to serve models with custom kernels, run
@@ -73,7 +72,7 @@ sudo apt-get install libssl-dev gcc -y
 Once installation is done, simply run:
 
 ```bash
-make run-falcon-7b-instruct
+tgi serve falcon-7b-instruct
 ```
 
 This will serve Falcon 7B Instruct model from the port 8080, which we can query.
