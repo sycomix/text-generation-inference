@@ -17,7 +17,7 @@ curl 127.0.0.1:8080/generate \
 ## Inference Client
 
 [`huggingface-hub`](https://huggingface.co/docs/huggingface_hub/main/en/index) is a Python library to interact with the Hugging Face Hub, including its endpoints. It provides a nice high-level class, [`~huggingface_hub.InferenceClient`], which makes it easy to make calls to a TGI endpoint. `InferenceClient` also takes care of parameter validation and provides a simple to-use interface.
-You can simply install `huggingface-hub` package with pip.
+You can install the required dependencies and configure the build environment by following the instructions below to install the `huggingface-hub` package using pip:
 
 ```bash
 pip install huggingface-hub
@@ -77,7 +77,7 @@ To serve both ChatUI and TGI in same environment, simply add your own endpoints 
 
 ## Gradio
 
-Gradio is a Python library that helps you build web applications for your machine learning models with a few lines of code. It has a `ChatInterface` wrapper that helps create neat UIs for chatbots. Let's take a look at how to create a chatbot with streaming mode using TGI and Gradio. Let's install Gradio and Hub Python library first.
+Gradio is a Python library that helps you build web applications for your machine learning models with a few lines of code. Before proceeding with the installation of Gradio and the Hub Python library, you will need to install the necessary dependencies and configure the build environment.
 
 ```bash
 pip install huggingface-hub gradio
