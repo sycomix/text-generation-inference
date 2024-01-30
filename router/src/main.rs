@@ -358,7 +358,7 @@ fn init_logging(otlp_endpoint: Option<String>, json_output: bool) {
 }
 
 /// get model info from the Huggingface Hub
-pub async fn get_model_info(api: &ApiRepo) -> Option<HubModelInfo> {
+pub async fn get_model_info(api: &ApiRepo) -> Result<HubModelInfo, RouterError> {
     let response = api.info_request().send().await.ok()?;
 
     if response.status().is_success() {
@@ -372,7 +372,7 @@ pub async fn get_model_info(api: &ApiRepo) -> Option<HubModelInfo> {
         }
         Some(hub_model_info)
     } else {
-        None
+        Some(HubModelInfo::default())
     }
 }
 

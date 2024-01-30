@@ -6,7 +6,7 @@ This section explains how to install the CLI tool as well as installing TGI from
 
 You can use TGI command-line interface (CLI) to download weights, serve and quantize models, or get information on serving parameters. 
 
-To install the CLI, you need to first clone the TGI repository and then run `make`.
+To install the CLI, you will need to first clone the TGI repository and then run the following commands to install the necessary dependencies and configure the build environment:
 
 ```bash
 git clone https://github.com/huggingface/text-generation-inference.git && cd text-generation-inference
@@ -21,7 +21,7 @@ BUILD_EXTENSIONS=True make install
 
 ## Local Installation from Source
 
-Before you start, you will need to setup your environment, and install Text Generation Inference. Text Generation Inference is tested on **Python 3.9+**.
+Before you start, you will need to setup your environment, install the necessary dependencies, and install Text Generation Inference. Text Generation Inference is tested on **Python 3.9+**. Additionally, you may need to install Protoc and the necessary build tools.
 
 Text Generation Inference is available on pypi, conda and GitHub. 
 
@@ -53,7 +53,7 @@ On MacOS, using Homebrew:
 brew install protobuf
 ```
 
-Then run to install Text Generation Inference:
+Then, run the following commands to install Text Generation Inference, including the necessary build tools:
 
 ```bash
 git clone https://github.com/huggingface/text-generation-inference.git && cd text-generation-inference
@@ -62,7 +62,7 @@ BUILD_EXTENSIONS=True make install
 
 <Tip warning={true}>
 
-On some machines, you may also need the OpenSSL libraries and gcc. On Linux machines, run:
+On some machines, you may also need to install the OpenSSL libraries and gcc. If you're on a Linux machine, run the following command to install the required build tools:
 
 ```bash
 sudo apt-get install libssl-dev gcc -y

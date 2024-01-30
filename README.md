@@ -54,18 +54,23 @@ Text Generation Inference (TGI) is a toolkit for deploying and serving Large Lan
 
 ## Get Started
 
+To build and run the project, follow these steps:
+
 ### Docker
 
 For a detailed starting guide, please see the [Quick Tour](https://huggingface.co/docs/text-generation-inference/quicktour). The easiest way of getting started is using the official Docker container:
 
 ```shell
+# Build and run the project
+
+# Set environment variables
 model=HuggingFaceH4/zephyr-7b-beta
 volume=$PWD/data # share a volume with the Docker container to avoid downloading weights every run
 
+# Build and run the Docker container
 docker run --gpus all --shm-size 1g -p 8080:80 -v $volume:/data ghcr.io/huggingface/text-generation-inference:1.3 --model-id $model
-```
 
-And then you can make requests like
+# Make requests like
 
 ```bash
 curl 127.0.0.1:8080/generate \
@@ -145,6 +150,8 @@ by setting the address to an OTLP collector with the `--otlp-endpoint` argument.
 ![TGI architecture](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/TGI.png)
 
 ### Local install
+
+To install the project locally, follow these steps:
 
 You can also opt to install `text-generation-inference` locally.
 
