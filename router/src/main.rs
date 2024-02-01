@@ -10,6 +10,8 @@ use opentelemetry::{global, KeyValue};
 use opentelemetry_otlp::WithExportConfig;
 /// Text Generation Inference webserver entrypoint
 use std::fs::File;
+use std::io::{BufRead, BufReader};
+use text_generation_router::RouterError;
 use std::io::BufReader;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::path::Path;
