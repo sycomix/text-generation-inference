@@ -4,8 +4,6 @@
   <img width=560 width=315 alt="Making TGI deployment optimal" src="https://huggingface.co/datasets/Narsil/tgi_assets/resolve/main/thumbnail.png">
 </a>
 
-# Text Generation Inference
-
 <a href="https://github.com/huggingface/text-generation-inference">
   <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/huggingface/text-generation-inference?style=social">
 </a>
@@ -94,6 +92,7 @@ You have the option to utilize the `HUGGING_FACE_HUB_TOKEN` environment variable
 `text-generation-inference`. This allows you to gain access to protected resources.
 
 For example, if you want to serve the gated Llama V2 model variants:
+- Fine-tuning Support: Utilize fine-tuned models for specific tasks to achieve higher accuracy and performance
 
 1. Go to https://huggingface.co/settings/tokens
 2. Copy your cli READ token

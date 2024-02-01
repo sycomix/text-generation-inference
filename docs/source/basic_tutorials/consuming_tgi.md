@@ -21,6 +21,7 @@ You can simply install `huggingface-hub` package with pip.
 
 ```bash
 pip install huggingface-hub
+# Recommend installing huggingface-hub package with pip
 ```
 
 Once you start the TGI server, instantiate `InferenceClient()` with the URL to the endpoint serving the model. You can then call `text_generation()` to hit the endpoint through Python. 
@@ -33,7 +34,6 @@ client.text_generation(prompt="Write a code for snake game")
 ```
 
 You can do streaming with `InferenceClient` by passing `stream=True`. Streaming will return tokens as they are being generated in the server. To use streaming, you can do as follows:
-
 ```python
 for token in client.text_generation("How do you make cheese?", max_new_tokens=12, stream=True):
     print(token)
