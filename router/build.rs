@@ -1,7 +1,7 @@
 use std::error::Error;
 use vergen::EmitBuilder;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Try to get the git sha from the local git repository
     if EmitBuilder::builder()
         .fail_on_error()
